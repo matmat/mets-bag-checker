@@ -112,22 +112,31 @@ def launch_test(validate_action, checkCompleteness_action, checkFixity_action, c
             progressBar.config(value=floor(progress_percentage))
             progress_label.config(text=f'Current progress = {progress_percentage}%.')
             frame1.update_idletasks()
-        with open(f'Report_{strftime("%Y-%m-%dT%H:%M:%S%z", report.date)}.csv', 'w', newline='') as csvreport:
-            csvwriter = csv.writer(csvreport, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            report.actions.insert(0, 'Package')
-            csvwriter.writerow(report.actions)
-            for IP in IPs.list_of_ips:
-                row = [IP[0]]
-                if 'Validation' in report.actions:
-                    row.append(report.validation_report["/".join(IP)])
-                if 'Completeness check' in report.actions:
-                    row.append(report.completeness_report["/".join(IP)])
-                if 'Completeness and fixity check' in report.actions:
-                    row.append(report.completenessAndFixity_report["/".join(IP)])
-                if 'Orphanness check' in report.actions:
-                    row.append(report.orphanness_report["/".join(IP)])
-                csvwriter.writerow(row)
+            select_output_location_button = ttk.Button(frame1, text="Select the location for the report file.", command=lambda:save_report(report, IPs))
+            select_output_location_button.grid(column=0, row=10)
         showinfo("Process ended.", f"The process analyzed {len(IPs.list_of_ips)} packages.")
+
+def save_report(report, IPs):
+    location = filedialog.asksaveasfilename(initialdir=path.curdir,
+                                            initialfile=f'Report_{strftime("%Y-%m-%dT%H:%M:%S%z", report.date)}.csv',
+                                            title = "Select the report location.",
+                                            filetypes = [("csv files", "*.csv")])
+    with open(location, 'w', newline='') as csvreport:
+        csvwriter = csv.writer(csvreport, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        report.actions.insert(0, 'Package')
+        csvwriter.writerow(report.actions)
+        for IP in IPs.list_of_ips:
+            row = [IP[0]]
+            if 'Validation' in report.actions:
+                row.append(report.validation_report["/".join(IP)])
+            if 'Completeness check' in report.actions:
+                row.append(report.completeness_report["/".join(IP)])
+            if 'Completeness and fixity check' in report.actions:
+                row.append(report.completenessAndFixity_report["/".join(IP)])
+            if 'Orphanness check' in report.actions:
+                row.append(report.orphanness_report["/".join(IP)])
+            csvwriter.writerow(row)
+
 
 # Interface creation
 root = tk.Tk()
