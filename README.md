@@ -5,7 +5,7 @@ METS Bag checker is a simple python tool to help METS implementers with little I
 
 Please be forgiving: this is my first real project in python (and in code in general).
 ## Pre-requisites
-METS is a metadata standard for packaging metadata of different types in a single XML file to describe a digital object at different levels of precision. It is not, though, a packaging standard like BagIt, though its `//mets:fileSec` element provides enough information to act as a manifest: a list of packaged files associated with a hash value.
+[Metadata Encoding and Transmission Standard (METS)](https://www.loc.gov/standards/mets/) is a metadata standard for packaging metadata of different types in a single XML file to describe a digital object at different levels of precision. It is not, though, a packaging standard like BagIt, though its `//mets:fileSec` element provides enough information to act as a manifest: a list of packaged files associated with a hash value.
 
 This tool is based on the following conditions and packaging conventions (rather commonly implemented when using METS as a metadata standard for Information Packages, e.g., the [METS rules for digitization produced by the National library of France](https://www.bnf.fr/fr/les-referentiels-de-numerisation-de-la-bnf#bnf-enrichissement-des-m-tadonn-es):
 * The METS file is well-formed;
