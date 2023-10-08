@@ -82,13 +82,10 @@ def launch_test(validate_action, checkCompleteness_action, checkFixity_action, c
         IPs.find_information_packages()
         # Display progress bar
         progressBar = ttk.Progressbar(frame1, orient='horizontal', mode='determinate', length=280)
-        progressBar.grid(row=8, column=0)
+        progressBar.grid(row=10, column=0)
         progress_label = ttk.Label(frame1, text=f"Current progress: 0%")
         progress_percentage = float()
-        progress_label.grid(row=9, column=0)
-        # # Display abort button
-        # abortButton = ttk.Button(frame1, text='Abort analysis')
-        # abortButton.grid(row=10, column=0)
+        progress_label.grid(row=11, column=0)
         # Initiate report
         report = Report(validate_action, checkCompleteness_action, checkFixity_action, checkOrphanness_action)
         # Counter to evaluate progression of the analysis process
@@ -112,8 +109,8 @@ def launch_test(validate_action, checkCompleteness_action, checkFixity_action, c
             progressBar.config(value=floor(progress_percentage))
             progress_label.config(text=f'Current progress = {progress_percentage}%.')
             frame1.update_idletasks()
-            select_output_location_button = ttk.Button(frame1, text="Select the location for the report file.", command=lambda:save_report(report, IPs))
-            select_output_location_button.grid(column=0, row=10)
+            select_output_location_button = ttk.Button(frame1, text="5. Select the location for the report file.", command=lambda:save_report(report, IPs))
+            select_output_location_button.grid(column=0, row=12)
         showinfo("Process ended.", f"The process analyzed {len(IPs.list_of_ips)} packages.")
 
 def save_report(report, IPs):
@@ -141,7 +138,7 @@ def save_report(report, IPs):
 # Interface creation
 root = tk.Tk()
 root.title("METS packages validation")
-root.geometry('1500x1000')
+root.geometry('1000x400')
 icon = tk.PhotoImage(file='mets.png')
 root.iconphoto(True, icon)
 
@@ -152,9 +149,9 @@ frame1.columnconfigure(0, weight=1)
 frame1.columnconfigure(1, weight=1)
 
 # Button to select the directory where METS Information Packages are located.
-define_directory_button = ttk.Button(frame1, text="Select a folder for analysis",
+define_directory_button = ttk.Button(frame1, text="1. Select a folder for analysis",
                                      command=define_directory)
-define_directory_button.grid(row=0, column=0)
+define_directory_button.grid(row=0, column=0, sticky=tk.W)
 define_directory_button.focus()
 
 # Label displaying the chosen directory.
@@ -163,15 +160,18 @@ directory_label.grid(row=0, column=1)
 
 # Label to introduce the METSfilename pattern entry.
 define_metspattern_label = ttk.Label(frame1,
-                                     text="Enter the METS filename or pattern (wildcards are accepted):")
-define_metspattern_label.grid(row=1, column=0)
+                                     text="2. Enter the METS filename or pattern:")
+define_metspattern_label.grid(row=2, column=0, sticky=tk.W)
 
 # Entry for defining the METS filename pattern.
 mets_pattern = tk.StringVar()
 define_metspattern_entry = ttk.Entry(frame1, textvariable=mets_pattern)
 mets_pattern.set('manifest.xml')
-define_metspattern_entry.grid(row=1, column=1)
+define_metspattern_entry.grid(row=2, column=1)
 
+# Label to introduce the actions selection.
+actions_label = ttk.Label(frame1, text="3. Select one or more actions.")
+actions_label.grid(row=4, column=0, sticky=tk.W)
 # Checkboxes to select which operations to perform.
 validate_action = tk.StringVar()
 checkCompleteness_action = tk.StringVar()
@@ -188,18 +188,18 @@ checkbox_operation_checkOrphanness = ttk.Checkbutton(frame1,
                                                      text=("Check if the packages "
                                                            "contain unreferenced files"),
                                                             variable=checkOrphanness_action)
-checkbox_operation_validate.grid(row=2, column=0, sticky=tk.W)
-checkbox_operation_checkCompleteness.grid(row=3, column=0, sticky=tk.W)
-checkbox_operation_checkFixity.grid(row=4, column=0, sticky=tk.W)
-checkbox_operation_checkOrphanness.grid(row=5, column=0, sticky=tk.W)
+checkbox_operation_validate.grid(row=5, column=0, sticky=tk.W)
+checkbox_operation_checkCompleteness.grid(row=6, column=0, sticky=tk.W)
+checkbox_operation_checkFixity.grid(row=7, column=0, sticky=tk.W)
+checkbox_operation_checkOrphanness.grid(row=8, column=0, sticky=tk.W)
 
 # Button for launching the analysis.
 launch_analysis_button = ttk.Button(frame1, command=lambda: launch_test(validate_action,
                                                                         checkCompleteness_action,
                                                                         checkFixity_action,
                                                                         checkOrphanness_action),
-                                                                        text="Launch the test")
-launch_analysis_button.grid(row=6, column=0)
+                                                                        text="4. Launch the test")
+launch_analysis_button.grid(row=9, column=0)
 
 # Additional code to correct blurry edges on Windows.
 # try:
