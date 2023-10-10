@@ -25,10 +25,8 @@ METS Bag checker can be used in the following ways.
 ### GUI
 _More guidance to come!_
 
+Execute the interface.py file.
+
 The interface.py file creates an interface to perform batch checks on all METS files conforming to a certain filename or filename pattern located in a directory.
 ### Python module
 The file mets.py can be used as a python module.
-### CLI
-_More guidance to come!_
-
-The mets.py file can be used as a CLI tool; it performs all checks on METS files whose path is specified.
