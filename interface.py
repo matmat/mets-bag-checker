@@ -31,6 +31,11 @@ class UndefinedAction(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+class UnparsableManifest(Exception):
+
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 class Report():
 
     """This class is intended for analysis reports"""
@@ -161,26 +166,30 @@ class App(tk.Tk):
             # Counter to evaluate progression of the analysis process
             counter = 0
             for file in IPs.list_of_ips:
-                manifest = mets.METSFile(path.join(file[0], file[1]))
-                # Validation check
-                if validate_action.get() == '1':
-                    report.validation_report[manifest.path_to_mets_file] = manifest.validate()
-                # Completeness check alone
-                if checkCompleteness_action.get() == '1' and (not checkFixity_action.get() or checkFixity_action.get() == '0'):
-                    report.completeness_report[manifest.path_to_mets_file] = manifest.checkCompleteness()
-                # Completeness check plus fixity check
-                if checkFixity_action.get() == '1':
-                    report.completenessAndFixity_report[manifest.path_to_mets_file] = manifest.checkCompletenessAndFixity()
-                # Orphanness check
-                if checkOrphanness_action.get() == '1':
-                    report.orphanness_report[manifest.path_to_mets_file] = manifest.checkOrphanness()
-                counter += 1
-                progress_percentage = round(counter / (len(IPs.list_of_ips) / 100), 2)
-                progressBar.config(value=floor(progress_percentage))
-                progress_label.config(text=f'Current progress = {progress_percentage}%.')
-                self.update_idletasks()
-                select_output_location_button = ttk.Button(self, text="5. Select the location for the report file.", command=lambda: self.save_report(report, IPs))
-                select_output_location_button.grid(column=0, row=12)
+                manifest = mets.METSFile(file)
+                if not hasattr(manifest, "xml"):
+                    raise UnparsableManifest(f"The manifest {manifest.path_to_mets_file}"
+                                             " could not be parsed; it is probably not well-formed.")
+                else:
+                    # Validation check
+                    if validate_action.get() == '1':
+                        report.validation_report[manifest.path_to_mets_file] = manifest.validate()
+                    # Completeness check alone
+                    if checkCompleteness_action.get() == '1' and (not checkFixity_action.get() or checkFixity_action.get() == '0'):
+                        report.completeness_report[manifest.path_to_mets_file] = manifest.checkCompleteness()
+                    # Completeness check plus fixity check
+                    if checkFixity_action.get() == '1':
+                        report.completenessAndFixity_report[manifest.path_to_mets_file] = manifest.checkCompletenessAndFixity()
+                    # Orphanness check
+                    if checkOrphanness_action.get() == '1':
+                        report.orphanness_report[manifest.path_to_mets_file] = manifest.checkOrphanness()
+                    counter += 1
+                    progress_percentage = round(counter / (len(IPs.list_of_ips) / 100), 2)
+                    progressBar.config(value=floor(progress_percentage))
+                    progress_label.config(text=f'Current progress = {progress_percentage}%.')
+                    self.update_idletasks()
+                    select_output_location_button = ttk.Button(self, text="5. Select the location for the report file.", command=lambda: self.save_report(report, IPs))
+                    select_output_location_button.grid(column=0, row=12)
             showinfo("Process ended.", f"The process analyzed {len(IPs.list_of_ips)} packages.")
 
     def save_report(self, report, IPs):
@@ -193,15 +202,15 @@ class App(tk.Tk):
             report.actions.insert(0, 'Package')
             csvwriter.writerow(report.actions)
             for IP in IPs.list_of_ips:
-                row = [IP[0]]
+                row = [IP]
                 if 'Validation' in report.actions:
-                    row.append(report.validation_report["/".join(IP)])
+                    row.append(report.validation_report[IP])
                 if 'Completeness check' in report.actions:
-                    row.append(report.completeness_report["/".join(IP)])
+                    row.append(report.completeness_report[IP])
                 if 'Completeness and fixity check' in report.actions:
-                    row.append(report.completenessAndFixity_report["/".join(IP)])
+                    row.append(report.completenessAndFixity_report[IP])
                 if 'Orphanness check' in report.actions:
-                    row.append(report.orphanness_report["/".join(IP)])
+                    row.append(report.orphanness_report[IP])
                 csvwriter.writerow(row)
 
     def report_callback_exception(self, exc, val, tb):

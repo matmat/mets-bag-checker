@@ -26,7 +26,7 @@ class InformationPackages:
         """Scans the target folder and returns all XML files matching the manifest name pattern."""
 
         for file in glob.glob(directory + mets_pattern, recursive=True):
-            self.list_of_ips.append(path.split(file))
+            self.list_of_ips.append(file)
 
 
 class METSFile:
@@ -49,7 +49,7 @@ class METSFile:
     def validate(self):
 
         """Validates the METS file against its XSD schema."""
-        parsed_schema = etree.parse('METSSchema/mets.xsd')
+        parsed_schema = etree.parse(path.join(path.split(__file__)[0], 'METSSchema/mets.xsd'))
         mets_schema = etree.XMLSchema(parsed_schema)
         if mets_schema.validate(self.xml) == True:
             return "Valid"
@@ -153,3 +153,10 @@ class METSFile:
         else:
             return f"No orphan files."
 
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        for argument in sys.argv[1:]:
+            manifest = METSFile(path.abspath(argument))
+            print("Manifest:", argument, "\n", manifest.validate(), "\n", manifest.checkCompleteness(),
+                  "\n", manifest.checkOrphanness(), "\n")
