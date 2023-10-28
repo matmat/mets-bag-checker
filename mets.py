@@ -157,6 +157,11 @@ class METSFile:
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         for argument in sys.argv[1:]:
-            manifest = METSFile(path.abspath(argument))
-            print("Manifest:", argument, "\n", manifest.validate(), "\n", manifest.checkCompleteness(),
-                  "\n", manifest.checkOrphanness(), "\n")
+            if path.exists(argument):
+                manifest = METSFile(path.abspath(argument))
+                print("Manifest:", argument, "\n", manifest.validate(), "\n", manifest.checkCompleteness(),
+                    "\n", manifest.checkOrphanness(), "\n")
+            else:
+                print(f"File {argument} cannot be found.")
+    else:
+        print("You have to provide at least one path to a METS manifest.")

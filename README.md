@@ -23,10 +23,19 @@ This tool is based on the following conditions and packaging conventions (rather
 ## Use
 METS Bag checker can be used in the following ways.
 ### GUI
-_More guidance to come!_
-
-Execute the interface.py file.
-
 The interface.py file creates an interface to perform batch checks on all METS files conforming to a certain filename or filename pattern located in a directory.
+
+Run the interface.py file.
+
+1. Choose the directory where your METS packages are located.
+2. Specify the name of your METS manifests (the wildcard "*" is accepted).
+3. Select the actions the tool should perform.
+4. Click on "Launch the test".
+5. When the test is completed, click on the button "Select the location for the report file." to save the report.
+
 ### Python module
-The file mets.py can be used as a python module.
+The file mets.py can be used as a python module: run
+
+`python3 mets.py \[path to the first manifest\] \[path to the second manifest\] ...`
+
+It will perform all the different checks on each manifest it identified.
