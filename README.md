@@ -36,6 +36,6 @@ Run the interface.py file.
 ### Python module
 The file mets.py can be used as a python module: run
 
-`python3 mets.py \[path to the first manifest\] \[path to the second manifest\] ...`
+`python3 mets.py [path to the first manifest] [path to the second manifest] ...`
 
 It will perform all the different checks on each manifest it identified.
