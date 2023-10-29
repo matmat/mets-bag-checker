@@ -7,6 +7,7 @@
 from os import path
 from time import localtime,strftime
 from math import floor
+import glob
 import csv
 
 import tkinter as tk
@@ -15,6 +16,7 @@ from tkinter import filedialog
 from tkinter.messagebox import showinfo, showerror
 
 import mets
+
 
 class UndefinedDirectory(Exception):
 
@@ -35,6 +37,23 @@ class UnparsableManifest(Exception):
 
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
+
+class InformationPackages:
+
+    """This class identifies Information Packages in the target folder.i.e. folders
+     containing a METS file with an expected file name."""
+
+    def __init__(self) -> None:
+        self.mets_pattern = r''
+        self.directory = ''
+
+    def find_information_packages(self):
+
+        """Scans the target folder and returns all XML files matching the manifest name pattern."""
+
+        self.list_of_ips = []
+        for file in glob.glob(self.directory + '/**/' + self.mets_pattern, recursive=True):
+            self.list_of_ips.append(file)
 
 class Report():
 
@@ -57,7 +76,7 @@ class Report():
             self.actions.append('Orphanness check')
     
     def __repr__(self) -> str:
-        return (f'Analysis report of the folder {mets.directory} '
+        return (f'Analysis report of the folder {IPs.directory} '
                 f'performing {", ".join(action for action in self.actions)}, '
                 f'started at {strftime("%Y-%m-%dT%H:%M:%S%z", self.date)}.')
 
@@ -71,12 +90,6 @@ class App(tk.Tk):
         self.geometry('1000x400')
         self.icon = tk.PhotoImage(file='mets.png')
         self.iconphoto(True, self.icon)
-
-        # Main frame creation
-        # self = tk.Frame(self, width=700, height=400)
-        # self.pack()
-        # self.columnconfigure(0, weight=1)
-        # self.columnconfigure(1, weight=1)
 
         # Button to select the directory where METS Information Packages are located.
         self.define_directory_button = ttk.Button(self, text="1. Select a folder for analysis",
@@ -135,15 +148,19 @@ class App(tk.Tk):
 
         """Asks the user to define the directory where the Information Packages are located."""
 
-        mets.directory = filedialog.askdirectory()
-        self.directory_label.config(text=mets.directory)
+        global IPs
+
+        IPs.directory = filedialog.askdirectory()
+        self.directory_label.config(text=IPs.directory)
 
     def launch_test(self, validate_action, checkCompleteness_action, checkFixity_action, checkOrphanness_action):
 
         """Calls the selected functions to perform tests selected by the user"""
 
+        global IPs
+
         # Exceptions if directory and METS file name pattern are not defined.
-        if mets.directory == '':
+        if IPs.directory == '':
             raise UndefinedDirectory('Please define a folder to analyse.')
         elif self.mets_pattern.get() == '':
             raise UndefinedMETSPattern('Please define the METS files name pattern.')
@@ -152,8 +169,7 @@ class App(tk.Tk):
             raise UndefinedAction('No action is selected.')
         else:
             # Detection of the Information Packages based on the METS file name pattern. 
-            mets.mets_pattern = '/**/' + self.mets_pattern.get()
-            IPs = mets.InformationPackages()
+            IPs.mets_pattern = self.mets_pattern.get()
             IPs.find_information_packages()
             # Display progress bar
             progressBar = ttk.Progressbar(self, orient='horizontal', mode='determinate', length=280)
@@ -217,6 +233,10 @@ class App(tk.Tk):
 
         """Manages exceptions and returns them to the user in an error box"""
         showerror("Error", message=str(val))
+
+
+IPs = InformationPackages()
+
 
 # Additional code to correct blurry edges on Windows.
 # try:
