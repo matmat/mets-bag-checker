@@ -10,25 +10,6 @@ from lxml import etree
 import hashlib
 
 
-directory = ''
-mets_pattern = r''
-
-class InformationPackages:
-
-    """This class identifies Information Packages in the target folder.i.e. folders
-     containing a METS file with an expected file name."""
-
-    def __init__(self) -> None:
-        self.list_of_ips = []
-
-    def find_information_packages(self):
-
-        """Scans the target folder and returns all XML files matching the manifest name pattern."""
-
-        for file in glob.glob(directory + mets_pattern, recursive=True):
-            self.list_of_ips.append(file)
-
-
 class METSFile:
 
     """This class is intended for XML-METS files."""
