@@ -1,5 +1,5 @@
 # mets-bag-checker
-METS Bag checker is a simple python tool to check the validitiy of their METS Information Packages (XML validity, completeness, Data Objects fixity, absence of unreferenced files).
+METS Bag checker is a simple python tool to check the validitiy of METS Information Packages (XML validity, completeness, Data Objects fixity, absence of unreferenced files).
 ## Description
 METS Bag checker is a simple python tool to help METS implementers with little IT resources checking the validitiy of their Information Packages (below abbreviated as "IP(s)"). The term "bag" refers to the [BagIt standard (RFC 8493)](https://www.rfc-editor.org/rfc/rfc8493), as this tool is based on some basic rules, similar to those defined by BagIt, in order to perform checks on IPs.
 
