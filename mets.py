@@ -1,7 +1,9 @@
-"""Module for batch validation of METS files."""
-
 #!/usr/bin/python3.10
 # -*-coding:utf-8 -*
+
+"""Module for batch validation of METS packages: XML validation, presence and
+fixity of all referenced files, absence of unreferenced files)."""
+
 from os import path
 import glob
 import sys
@@ -12,7 +14,9 @@ import hashlib
 
 class METSFile:
 
-    """This class is intended for XML-METS files."""
+    """This class is instantiated for each XML-METS file. It contains methods
+    used to check the consistency of the manifest with the Information 
+     package, i.e., the directory where the XML-METS file is located."""
 
     def __init__(self, path_to_mets_file) -> None:
         self.path_to_mets_file = path_to_mets_file

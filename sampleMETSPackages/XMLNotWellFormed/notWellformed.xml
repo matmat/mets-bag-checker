@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<mets xmlns="http://www.loc.gov/METS/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:premis="info:lc/xmlns/premis-v2" xmlns:mix="http://www.loc.gov/mix/v10" xmlns:textmd="info:lc/xmlns/textMD-v3" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:spar_dc="http://bibnum.bnf.fr/ns/spar_dc">
+ <dmdSec ID="DMD.1">
+  <mdWrap MIMETYPE="text/xml" MDTYPE="DC">
+   <xmlData>
+    <spar_dc:spar_dc>
+     <dc:title>Outil DROID</dc:title
+     <dc:date>2008-05-23</dc:date>
+     <dc:type>softwareAgent</dc:type>
+     <dc:description>Description de l'outil DROID (identification de format)</dc:description>
+    </spar_dc:spar_dc>
+   </xmlData>
+  </mdWrap>
+ </dmdSec>
+ <amdSec>
+  <techMD ID="AMD.1">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="textMD">
+    <xmlData><textmd:textMD>
+     <textmd:character_info>
+      <textmd:charset>UTF-8</textmd:charset>
+      <textmd:byte_order>little</textmd:byte_order>
+      <textmd:byte_size>8</textmd:byte_size>
+      <textmd:character_size encoding="UTF-8">variable</textmd:character_size>
+      <textmd:linebreak>CR/LF</textmd:linebreak>
+     </textmd:character_info>
+    </textmd:textMD></xmlData>
+   </mdWrap>
+  </techMD>
+  <techMD ID="AMD.2">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="PREMIS:OBJECT">
+    <xmlData><premis:object xsi:type="premis:file">
+    <premis:objectIdentifier>
+        <premis:objectIdentifierType>metsIdentifier</premis:objectIdentifierType>
+        <premis:objectIdentifierValue>documentation.0001</premis:objectIdentifierValue>
+    </premis:objectIdentifier>
+    <premis:objectCharacteristics>
+        <premis:compositionLevel>0</premis:compositionLevel>
+        <premis:format>
+            <premis:formatDesignation>
+                <premis:formatName>text/plain</premis:formatName>
+            </premis:formatDesignation>
+            <premis:formatRegistry>
+                <premis:formatRegistryName>BnF SPAR</premis:formatRegistryName>
+                <premis:formatRegistryKey>ark:/12148/br2d2b4</premis:formatRegistryKey>
+            </premis:formatRegistry>
+        </premis:format>
+    </premis:objectCharacteristics>
+    <premis:storage>
+        <premis:storageMedium>SPAR storage unit</premis:storageMedium>
+    </premis:storage>
+</premis:object></xmlData>
+   </mdWrap>
+  </techMD>
+  <techMD ID="AMD.3">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="textMD">
+    <xmlData><textmd:textMD>
+      <textmd:character_info>
+       <textmd:charset>UTF-8</textmd:charset>
+       <textmd:byte_order>little</textmd:byte_order>
+       <textmd:byte_size>8</textmd:byte_size>
+       <textmd:character_size encoding="UTF-8">variable</textmd:character_size>
+       <textmd:linebreak>CR/LF</textmd:linebreak>
+      </textmd:character_info>
+      <textmd:markup_basis version="1.0">XML</textmd:markup_basis>
+      <textmd:markup_language>http://bibnum.bnf.fr/ns/agent</textmd:markup_language>
+     </textmd:textMD></xmlData>
+   </mdWrap>
+  </techMD>
+  <techMD ID="AMD.4">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="PREMIS:OBJECT">
+    <xmlData><premis:object xsi:type="premis:file">
+    <premis:objectIdentifier>
+        <premis:objectIdentifierType>metsIdentifier</premis:objectIdentifierType>
+        <premis:objectIdentifierValue>dataManagement.0001</premis:objectIdentifierValue>
+    </premis:objectIdentifier>
+    <premis:objectCharacteristics>
+        <premis:compositionLevel>0</premis:compositionLevel>
+        <premis:format>
+            <premis:formatDesignation>
+                <premis:formatName>text/xml</premis:formatName>
+            </premis:formatDesignation>
+            <premis:formatRegistry>
+                <premis:formatRegistryName>BnF SPAR</premis:formatRegistryName>
+                <premis:formatRegistryKey>ark:/12148/br2d2rm</premis:formatRegistryKey>
+            </premis:formatRegistry>
+        </premis:format>
+    </premis:objectCharacteristics>
+    <premis:storage>
+        <premis:storageMedium>SPAR storage unit</premis:storageMedium>
+    </premis:storage>
+</premis:object></xmlData>
+   </mdWrap>
+  </techMD>
+  <techMD ID="AMD.5">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="PREMIS:OBJECT">
+    <xmlData><premis:object xsi:type="premis:file">
+    <premis:objectIdentifier>
+        <premis:objectIdentifierType>metsIdentifier</premis:objectIdentifierType>
+        <premis:objectIdentifierValue>source.0001</premis:objectIdentifierValue>
+    </premis:objectIdentifier>
+    <premis:objectCharacteristics>
+        <premis:compositionLevel>0</premis:compositionLevel>
+        <premis:format>
+            <premis:formatDesignation>
+                <premis:formatName>application/x-gzip</premis:formatName>
+            </premis:formatDesignation>
+            <premis:formatRegistry>
+                <premis:formatRegistryName>BnF SPAR</premis:formatRegistryName>
+                <premis:formatRegistryKey>ark:/12148/br2d2h5</premis:formatRegistryKey>
+            </premis:formatRegistry>
+        </premis:format>
+    </premis:objectCharacteristics>
+    <premis:objectCharacteristics>
+        <premis:compositionLevel>1</premis:compositionLevel>
+        <premis:format>
+            <premis:formatDesignation>
+                <premis:formatName>application/x-tar</premis:formatName>
+            </premis:formatDesignation>
+            <premis:formatRegistry>
+                <premis:formatRegistryName>BnF SPAR</premis:formatRegistryName>
+                <premis:formatRegistryKey>ark:/12148/br2d2jc</premis:formatRegistryKey>
+            </premis:formatRegistry>
+        </premis:format>
+    </premis:objectCharacteristics>
+    <premis:storage>
+        <premis:storageMedium>SPAR storage unit</premis:storageMedium>
+    </premis:storage>
+</premis:object></xmlData>
+   </mdWrap>
+  </techMD>
+  <techMD ID="AMD.6">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="textMD">
+    <xmlData><textmd:textMD>
+     <textmd:character_info>
+      <textmd:charset>UTF-8</textmd:charset>
+      <textmd:byte_order>little</textmd:byte_order>
+      <textmd:byte_size>8</textmd:byte_size>
+      <textmd:character_size encoding="UTF-8">variable</textmd:character_size>
+      <textmd:linebreak>CR/LF</textmd:linebreak>
+     </textmd:character_info>
+     <textmd:markup_basis version="1.0">XML</textmd:markup_basis>
+     <textmd:markup_language>http://www.nationalarchives.gov.uk/pronom/SignatureFile</textmd:markup_language>
+    </textmd:textMD></xmlData>
+   </mdWrap>
+  </techMD>
+  <techMD ID="AMD.7">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="PREMIS:OBJECT">
+    <xmlData><premis:object xsi:type="premis:file">
+    <premis:objectIdentifier>
+        <premis:objectIdentifierType>metsIdentifier</premis:objectIdentifierType>
+        <premis:objectIdentifierValue>referenceDocument.0001</premis:objectIdentifierValue>
+    </premis:objectIdentifier>
+    <premis:objectCharacteristics>
+        <premis:compositionLevel>0</premis:compositionLevel>
+        <premis:format>
+            <premis:formatDesignation>
+                <premis:formatName>text/xml</premis:formatName>
+            </premis:formatDesignation>
+            <premis:formatRegistry>
+                <premis:formatRegistryName>BnF SPAR</premis:formatRegistryName>
+                <premis:formatRegistryKey>ark:/12148/br2d269</premis:formatRegistryKey>
+            </premis:formatRegistry>
+        </premis:format>
+    </premis:objectCharacteristics>
+    <premis:storage>
+        <premis:storageMedium>SPAR storage unit</premis:storageMedium>
+    </premis:storage>
+</premis:object></xmlData>
+   </mdWrap>
+  </techMD>
+  <techMD ID="AMD.8">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="PREMIS:OBJECT">
+    <xmlData><premis:object xsi:type="premis:representation">
+    <premis:objectIdentifier>
+        <premis:objectIdentifierType>productionIdentifier</premis:objectIdentifierType>
+        <premis:objectIdentifierValue>info:bnf/spar/agent/droid_3_0_0</premis:objectIdentifierValue>
+    </premis:objectIdentifier>
+    <premis:objectIdentifier>
+        <premis:objectIdentifierType>uri</premis:objectIdentifierType>
+        <premis:objectIdentifierValue>info:bnf/spar/agent/droid_3_0_0</premis:objectIdentifierValue>
+    </premis:objectIdentifier>
+    <premis:objectIdentifier>
+        <premis:objectIdentifierType>ark</premis:objectIdentifierType>
+        <premis:objectIdentifierValue>ark:/12148/br2d2fr</premis:objectIdentifierValue>
+    </premis:objectIdentifier>
+    <premis:objectIdentifier>
+        <premis:objectIdentifierType>versionIdentifier</premis:objectIdentifierType>
+        <premis:objectIdentifierValue>version0.release0</premis:objectIdentifierValue>
+    </premis:objectIdentifier>
+    <premis:relationship>
+        <premis:relationshipType>track</premis:relationshipType>
+        <premis:relationshipSubType>channel</premis:relationshipSubType>
+        <premis:relatedObjectIdentification>
+            <premis:relatedObjectIdentifierType>ark</premis:relatedObjectIdentifierType>
+            <premis:relatedObjectIdentifierValue>ark:/12148/br2d230p</premis:relatedObjectIdentifierValue>
+        </premis:relatedObjectIdentification>
+    </premis:relationship>
+</premis:object></xmlData>
+   </mdWrap>
+  </techMD>
+  <digiprovMD ID="AMD.9">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="PREMIS:EVENT">
+    <xmlData><premis:event>
+    <premis:eventIdentifier>
+        <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+        <premis:eventIdentifierValue>e87657ac-3010-4862-b8e6-135707414b50</premis:eventIdentifierValue>
+    </premis:eventIdentifier>
+    <premis:eventType>packageCreation</premis:eventType>
+    <premis:eventDateTime>2010-02-18T12:01:27+01:00</premis:eventDateTime>
+    <premis:eventDetail>reference package creation</premis:eventDetail>
+    <premis:linkingAgentIdentifier>
+        <premis:linkingAgentIdentifierType>producerIdentifier</premis:linkingAgentIdentifierType>
+        <premis:linkingAgentIdentifierValue>REF</premis:linkingAgentIdentifierValue>
+        <premis:linkingAgentRole>issuer</premis:linkingAgentRole>
+    </premis:linkingAgentIdentifier>
+    <premis:linkingAgentIdentifier>
+        <premis:linkingAgentIdentifierType>channelIdentifier</premis:linkingAgentIdentifierType>
+        <premis:linkingAgentIdentifierValue>info:bnf/spar/context/fil_ref_agent</premis:linkingAgentIdentifierValue>
+        <premis:linkingAgentRole>authorizer</premis:linkingAgentRole>
+    </premis:linkingAgentIdentifier>
+    <premis:linkingObjectIdentifier>
+        <premis:linkingObjectIdentifierType>productionIdentifier</premis:linkingObjectIdentifierType>
+        <premis:linkingObjectIdentifierValue>info:bnf/spar/agent/droid_3_0_0</premis:linkingObjectIdentifierValue>
+    </premis:linkingObjectIdentifier>
+</premis:event></xmlData>
+   </mdWrap>
+  </digiprovMD>
+  <digiprovMD ID="AMD.10">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="PREMIS:EVENT">
+    <xmlData><premis:event>
+    <premis:eventIdentifier>
+        <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+        <premis:eventIdentifierValue>0599f436-e68d-4d14-91d0-5146c91e745a</premis:eventIdentifierValue>
+    </premis:eventIdentifier>
+    <premis:eventType>idGeneration</premis:eventType>
+    <premis:eventDateTime>2010-02-18T12:01:27+01:00</premis:eventDateTime>
+    <premis:eventDetail>idGeneration is valid</premis:eventDetail>
+    <premis:eventOutcomeInformation>
+        <premis:eventOutcome>ark:/12148/br2d2fr</premis:eventOutcome>
+    </premis:eventOutcomeInformation>
+    <premis:linkingAgentIdentifier>
+        <premis:linkingAgentIdentifierType>human</premis:linkingAgentIdentifierType>
+        <premis:linkingAgentIdentifierValue>ark:/12148/br2d2p6</premis:linkingAgentIdentifierValue>
+        <premis:linkingAgentRole>performer</premis:linkingAgentRole>
+    </premis:linkingAgentIdentifier>
+</premis:event></xmlData>
+   </mdWrap>
+  </digiprovMD>
+  <digiprovMD ID="AMD.11">
+   <mdWrap MIMETYPE="text/xml" MDTYPE="PREMIS:EVENT">
+    <xmlData><premis:event>
+    <premis:eventIdentifier>
+        <premis:eventIdentifierType>UUID</premis:eventIdentifierType>
+        <premis:eventIdentifierValue>9459dd39-731f-4638-ac88-708f61be2b41</premis:eventIdentifierValue>
+    </premis:eventIdentifier>
+    <premis:eventType>ingestCompletion</premis:eventType>
+    <premis:eventDateTime>2010-02-18T12:01:27+01:00</premis:eventDateTime>
+    <premis:eventDetail>ingest is successfully performed</premis:eventDetail>
+    <premis:eventOutcomeInformation>
+        <premis:eventOutcome>manual storage</premis:eventOutcome>
+    </premis:eventOutcomeInformation>
+    <premis:linkingAgentIdentifier>
+        <premis:linkingAgentIdentifierType>human</premis:linkingAgentIdentifierType>
+        <premis:linkingAgentIdentifierValue>ark:/12148/br2d2p6</premis:linkingAgentIdentifierValue>
+        <premis:linkingAgentRole>performer</premis:linkingAgentRole>
+    </premis:linkingAgentIdentifier>
+</premis:event></xmlData>
+   </mdWrap>
+  </digiprovMD>
+ </amdSec>
+ <fileSec>
+  <fileGrp ID="GRP.1" USE="documentation">
+   <file ID="documentation.0001" MIMETYPE="text/plain" SIZE="9904" CHECKSUM="9354ea6b34af91415ad7a3066cec5241" CHECKSUMTYPE="MD5" ADMID="AMD.1 AMD.2">
+    <FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="documentation/tool.txt"/>
+   </file>
+  </fileGrp>
+  <fileGrp ID="GRP.2" USE="dataManagement">
+   <file ID="dataManagement.0001" MIMETYPE="text/xml" SIZE="3892" CHECKSUM="15cdee644fcaf3d5a6c00f35da9b1316" CHECKSUMTYPE="MD5" ADMID="AMD.3 AMD.4">
+    <FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="dataManagement/tool.xml"/>
+   </file>
+  </fileGrp>
+  <fileGrp ID="GRP.3" USE="source">
+   <file ID="source.0001" MIMETYPE="application/x-gzip" SIZE="23838257" CHECKSUM="518722c76a56c172bc5f3c3eb6e9c96e" CHECKSUMTYPE="MD5" ADMID="AMD.5">
+    <FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="source/droid-src-3.0.0.tar.gz"/>
+   </file>
+  </fileGrp>
+  <fileGrp ID="GRP.4" USE="referenceDocument">
+   <file ID="referenceDocument.0001" MIMETYPE="text/xml" SIZE="444415" CHECKSUM="3ed7af6fd5f524d8518451000f49e6f1" CHECKSUMTYPE="MD5" ADMID="AMD.6 AMD.7">
+    <FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="referenceDocument/DROID_SignatureFile_V13.xml"/>
+   </file>
+  </fileGrp>
+ </fileSec>
+ <structMap TYPE="physical">
+  <div ID="DIV.1" TYPE="set">
+   <div ID="DIV.2" DMDID="DMD.1" ADMID="AMD.11 AMD.10 AMD.8 AMD.9" TYPE="group">
+    <div ID="DIV.3" ORDER="1" TYPE="object">
+     <fptr FILEID="documentation.0001"/>
+     <fptr FILEID="dataManagement.0001"/>
+    </div>
+   </div>
+  </div>
+ </structMap>
+ <structMap TYPE="source">
+  <div ID="DIV.4" TYPE="set">
+   <div ID="DIV.5" DMDID="DMD.1" ADMID="AMD.11 AMD.10 AMD.8 AMD.9" TYPE="group">
+    <div ID="DIV.6" ORDER="1" TYPE="object">
+     <fptr FILEID="source.0001"/>
+    </div>
+   </div>
+  </div>
+ </structMap>
+ <structMap TYPE="attachment">
+  <div ID="DIV.7" TYPE="set">
+   <div ID="DIV.8" DMDID="DMD.1" ADMID="AMD.11 AMD.10 AMD.8 AMD.9" TYPE="group">
+    <div ID="DIV.9" ORDER="1" TYPE="object">
+     <fptr FILEID="referenceDocument.0001"/>
+    </div>
+   </div>
+  </div>
+ </structMap>
+</mets>

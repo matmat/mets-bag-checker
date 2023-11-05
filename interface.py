@@ -1,8 +1,7 @@
-"""Module of the GUI for METS validation & integrity checking."""
-
-#!/usr/bin/python3.10
+#!/usr/bin/python3
 # -*-coding:utf-8 -*
 
+"""GUI module for METS validation & integrity checking."""
 
 from os import path
 from time import localtime,strftime
@@ -237,13 +236,6 @@ class App(tk.Tk):
 
 IPs = InformationPackages()
 
-
-# Additional code to correct blurry edges on Windows.
-# try:
-#     from ctypes import windll
-
-#     windll.shcore.SetProcessDpiAwareness(1)
-# finally:
 if __name__ == '__main__':
     root = App()
     root.mainloop()
