@@ -64,8 +64,8 @@ class METSPackage:
     def listReferencedFiles(self):
         """Returns a list of relative paths referenced in the <fileSec> section
         of the METS file."""
+        self.list_of_referenced_files = []
         if self.has_wellformed_manifest:
-            self.list_of_referenced_files = []
             for file in self.xml.xpath(
                 "/mets:mets/mets:fileSec//mets:file/" "mets:FLocat",
                 namespaces={"mets": "http://www.loc.gov/" "METS/"},
@@ -76,10 +76,8 @@ class METSPackage:
                         namespaces={"xlink": "http://www.w3.org/" "1999/xlink"},
                     )[0]
                 )
-            return self.list_of_referenced_files
-        else:
-            return None
-
+        return self.list_of_referenced_files
+        
     def listPackageFiles(self):
         """Returns a list of relative paths to every file located in the same
         folder as the METS file as the attribute list_of_package_files."""
@@ -94,7 +92,7 @@ class METSPackage:
         the Information Package. Returns False and breaks at first missing
         file."""
         list_of_referenced_files = self.listReferencedFiles()
-        if type(list_of_referenced_files) == list:
+        if list_of_referenced_files:
             for file in list_of_referenced_files:
                 absolute_path_to_data_object = path.join(self.directory, file)
                 if not path.exists(absolute_path_to_data_object):
@@ -112,9 +110,7 @@ class METSPackage:
                 absolute_path_to_data_object = path.join(self.directory, file)
                 if not path.exists(absolute_path_to_data_object):
                     self.missing_files.append(file)
-            return self.missing_files
-        else:
-            return None
+        return self.missing_files
                 
     @property
     def is_unaltered(self):
@@ -202,9 +198,7 @@ class METSPackage:
                         self.altered_files.append(relative_path_to_data_object)
                 else:
                     self.unchecked_files.append(relative_path_to_data_object)
-            return (self.altered_files, self.unchecked_files)
-        else:
-            return (None, None)
+        return (self.altered_files, self.unchecked_files)
         
     @property
     def has_no_orphan_files(self):
@@ -226,7 +220,7 @@ class METSPackage:
         """Lists unreferenced files located in the Information Package, i.e.,
         files that are in the same folder as the METS file but that are not
         referenced in its file section <fileSec>."""
-        self.orphan_files = ''
+        self.orphan_files = []
         if self.has_wellformed_manifest:
             if not hasattr(self, "list_of_referenced_files"):
                 self.listReferencedFiles()
@@ -234,10 +228,8 @@ class METSPackage:
             for file in self.list_of_package_files:
                 if file not in self.list_of_referenced_files:
                     self.orphan_files.append(file)
-            return self.orphan_files
-        else:
-            return None
-
+        return self.orphan_files
+        
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         result_table = []
@@ -279,7 +271,7 @@ if __name__ == "__main__":
             tabulate(
                 result_table,
                 headers=[
-                    "METS file",
+                    "Package",
                     "Well-formed",
                     "Valid",
                     "Complete",
@@ -287,7 +279,7 @@ if __name__ == "__main__":
                     'Unaltered',
                     "Altered files",
                     "Unchecked files",
-                    "Has no orphan files",
+                    "No orphan",
                     "Orphan files"
                 ]
             )

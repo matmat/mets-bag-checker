@@ -12,7 +12,7 @@ import csv
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import showinfo, showerror
 import importlib.resources
 
 import mets
@@ -102,7 +102,7 @@ class App(tk.Tk):
 
         # Interface creation
         self.title("METS packages validation")
-        self.geometry("1000x400")
+        self.geometry("1900x600")
         with importlib.resources.as_file(
             importlib.resources.files("mets_icon").joinpath("mets.png")
         ) as METS_icon:
@@ -175,6 +175,77 @@ class App(tk.Tk):
             text="4. Launch the test",
         )
         self.launch_analysis_button.grid(row=9, column=0)
+        # Set the table frame for displaying the analysis results.
+        self.report_table_frame = tk.Frame(self, width=1800)
+        self.report_table_frame.grid(columnspan=2, row=10)
+        # Display scrollbar for the report diplay table
+        self.table_vertical_scroll = ttk.Scrollbar(self.report_table_frame)
+        self.table_vertical_scroll.pack(side=tk.RIGHT,fill=tk.Y)
+        # Display the report in a table in the interface.
+        self.display_report_table = ttk.Treeview(
+            self.report_table_frame,
+            show="headings",
+            height=12,
+            yscrollcommand=self.table_vertical_scroll.set)
+        self.table_vertical_scroll.configure(command=self.display_report_table.yview)
+        self.display_report_table["columns"] = (
+            "package",
+            "wf_check",
+            "validation",
+            "completeness_check",
+            "missing_files",
+            "fixity_check",
+            "altered_files",
+            "unchecked_files",
+            "orphanness_check",
+            "orphan_files",
+        )
+        self.display_report_table.column("#0", stretch=tk.NO)
+        self.display_report_table.column("package", anchor=tk.W, width=200)
+        self.display_report_table.column("wf_check", anchor=tk.W, width=150)
+        self.display_report_table.column("validation", anchor=tk.W, width=150)
+        self.display_report_table.column(
+            "completeness_check", anchor=tk.W, width=250
+        )
+        self.display_report_table.column("missing_files", anchor=tk.W, width=210)
+        self.display_report_table.column("fixity_check", anchor=tk.W, width=150)
+        self.display_report_table.column("altered_files", anchor=tk.W, width=200)
+        self.display_report_table.column("unchecked_files", anchor=tk.W, width=200)
+        self.display_report_table.column(
+            "orphanness_check", anchor=tk.W, width=150
+        )
+        self.display_report_table.column("orphan_files", anchor=tk.W, width=200)
+
+        self.display_report_table.heading("#0", text="", anchor=tk.W)
+        self.display_report_table.heading("package", text="Package", anchor=tk.W)
+        self.display_report_table.heading(
+            "wf_check", text="Well-formed", anchor=tk.W
+        )
+        self.display_report_table.heading(
+            "validation", text="Valid", anchor=tk.W
+        )
+        self.display_report_table.heading(
+            "completeness_check", text="Complete", anchor=tk.W
+        )
+        self.display_report_table.heading(
+            "missing_files", text="Missing files", anchor=tk.W
+        )
+        self.display_report_table.heading(
+            "fixity_check", text="Unaltered", anchor=tk.W
+        )
+        self.display_report_table.heading(
+            "altered_files", text="Altered files", anchor=tk.W
+        )
+        self.display_report_table.heading(
+            "unchecked_files", text="Unchecked files", anchor=tk.W
+        )
+        self.display_report_table.heading(
+            "orphanness_check", text="No orphan", anchor=tk.W
+        )
+        self.display_report_table.heading(
+            "orphan_files", text="Orphan files", anchor=tk.W
+        )
+        self.display_report_table.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def define_directory(self):
         """Asks the user to define the directory where the Information Packages are located."""
@@ -215,10 +286,10 @@ class App(tk.Tk):
             progressBar = ttk.Progressbar(
                 self, orient="horizontal", mode="determinate", length=280
             )
-            progressBar.grid(row=10, column=0)
+            progressBar.grid(row=11, columnspan=2)
             progress_label = ttk.Label(self, text=f"Current progress: 0%")
             progress_percentage = float()
-            progress_label.grid(row=11, column=0)
+            progress_label.grid(row=12, columnspan=2)
             # Initiate report
             report = Report(
                 validate_action,
@@ -243,7 +314,7 @@ class App(tk.Tk):
                 if checkCompleteness_action.get() == "1":
                     report.completeness_report[package.path_to_mets_file] = [
                         package.is_complete
-                        ]
+                    ]
                     if (
                         report.completeness_report[package.path_to_mets_file][0]
                         == False
@@ -276,16 +347,85 @@ class App(tk.Tk):
                     text=f"Current progress = {progress_percentage}%."
                 )
                 self.update_idletasks()
-                select_output_location_button = ttk.Button(
-                    self,
-                    text="5. Select the location for the report file.",
-                    command=lambda: self.save_report(report),
+            # Generate report
+            report = self.build_report(report)
+            # Display button to define the location where report will be saved.
+            select_output_location_button = ttk.Button(
+                self,
+                text="5. Select the location for the report file.",
+                command=lambda: self.save_report(report),
+            )
+            select_output_location_button.grid(columnspan=2, row=13)
+            # Filling the report table.
+            self.display_report_table.delete(*self.display_report_table.get_children())
+            index = 1
+            for row in report.table[1:]:
+                self.display_report_table.insert(
+                    parent="", index="end", iid=index, text="", values=row
                 )
-                select_output_location_button.grid(column=0, row=12)
+                index += 1
+            self.display_report_table.grid(column=0, row=0)
+            # Message box to inform that the process ended.
             showinfo(
                 "Process ended.",
                 f"The process analyzed {len(list_of_packages)} packages.",
             )
+
+    def build_report(self, report):
+        report.table = []
+        report.table.append([
+            "Package",
+            "Well-formed",
+            "Valid",
+            "Complete",
+            "Missing files",
+            "Unaltered",
+            "Altered files",
+            "Unchecked files",
+            "No orphan",
+            "Orphan files",
+        ])
+        for relative_path, package in report.list_of_packages.items():
+            row = [
+                relative_path,
+                report.wellformedness_report[package.path_to_mets_file],
+            ]
+            if "Validation" in report.columns:
+                row.append(report.validation_report[package.path_to_mets_file])
+            else:
+                row.append("Not performed")
+            if "Completeness check" in report.columns:
+                row.append(report.completeness_report[package.path_to_mets_file][0])
+                if len(report.completeness_report[package.path_to_mets_file]) > 1:
+                    row.append(report.completeness_report[package.path_to_mets_file][1])
+                else:
+                    row.append("")
+            else:
+                row.append("Not performed")
+                row.append("")
+            if "Fixity check" in report.columns:
+                row.append(report.fixity_report[package.path_to_mets_file][0])
+                if len(report.fixity_report[package.path_to_mets_file]) > 1:
+                    row.append(report.fixity_report[package.path_to_mets_file][1][0])
+                    row.append(report.fixity_report[package.path_to_mets_file][1][1])
+                else:
+                    row.append("")
+                    row.append("")
+            else:
+                row.append("Not performed")
+                row.append("")
+                row.append("")
+            if "Orphanness check" in report.columns:
+                row.append(report.orphanness_report[package.path_to_mets_file][0])
+                if len(report.orphanness_report[package.path_to_mets_file]) > 1:
+                    row.append(report.orphanness_report[package.path_to_mets_file][1])
+                else:
+                    row.append("")
+            else:
+                row.append("Not performed")
+                row.append("")
+            report.table.append(row)
+        return report
 
     def save_report(self, report):
         location = filedialog.asksaveasfilename(
@@ -298,41 +438,12 @@ class App(tk.Tk):
             csvwriter = csv.writer(
                 csvreport, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
             )
-            report.columns.insert(0, "Package")
-            csvwriter.writerow(report.columns)
-            for relative_path, package in report.list_of_packages.items():
-                row = [
-                    relative_path,
-                    report.wellformedness_report[package.path_to_mets_file],
-                ]
-                if "Validation" in report.columns:
-                    row.append(report.validation_report[package.path_to_mets_file])
-                if "Completeness check" in report.columns:
-                    row.append(report.completeness_report[package.path_to_mets_file][0])
-                    if len(report.completeness_report[package.path_to_mets_file]) > 1:
-                        row.append(report.completeness_report[package.path_to_mets_file][1])
-                    else:
-                        row.append('')
-                if "Fixity check" in report.columns:
-                    row.append(report.fixity_report[package.path_to_mets_file][0])
-                    if len(report.fixity_report[package.path_to_mets_file]) > 1:
-                        row.append(report.fixity_report[package.path_to_mets_file][1][0])
-                        row.append(report.fixity_report[package.path_to_mets_file][1][1])
-                    else:
-                        row.append('')
-                        row.append('')
-                if "Orphanness check" in report.columns:
-                    row.append(report.orphanness_report[package.path_to_mets_file][0])
-                    if len(report.orphanness_report[package.path_to_mets_file]) > 1:
-                        row.append(report.orphanness_report[package.path_to_mets_file][1])
-                    else:
-                        row.append('')
+            for row in report.table:
                 csvwriter.writerow(row)
 
-    # def report_callback_exception(self, exc, val, tb):
-
-    #     """Manages exceptions and returns them to the user in an error box"""
-    #     showerror("Error", message=str(val))
+    def report_callback_exception(self, exc, val, tb):
+        """Manages exceptions and returns them to the user in an error box"""
+        showerror("Error", message=str(val))
 
 
 if __name__ == "__main__":
