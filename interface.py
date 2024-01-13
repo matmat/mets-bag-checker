@@ -180,7 +180,7 @@ class App(tk.Tk):
         self.report_table_frame.grid(columnspan=2, row=10)
         # Display scrollbar for the report diplay table
         self.table_vertical_scroll = ttk.Scrollbar(self.report_table_frame)
-        self.table_vertical_scroll.pack(side=tk.RIGHT,fill=tk.Y)
+        self.table_vertical_scroll.grid(column=1, row=0, sticky=tk.NS)
         # Display the report in a table in the interface.
         self.display_report_table = ttk.Treeview(
             self.report_table_frame,
@@ -245,7 +245,7 @@ class App(tk.Tk):
         self.display_report_table.heading(
             "orphan_files", text="Orphan files", anchor=tk.W
         )
-        self.display_report_table.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.display_report_table.grid(column=0, row=1)
 
     def define_directory(self):
         """Asks the user to define the directory where the Information Packages are located."""
