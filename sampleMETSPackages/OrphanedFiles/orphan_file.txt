@@ -1,0 +1,2 @@
+This file is in the same directory as the METS file, but is not referenced in
+the METS.
