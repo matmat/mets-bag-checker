@@ -247,7 +247,7 @@ if __name__ == "__main__":
                 if not is_unaltered:
                     altered_and_unchecked_files = package.listAlteredFiles()
                 has_no_orphan_files = package.has_no_orphan_files
-                orphan_files = ''
+                orphan_files = []
                 if not has_no_orphan_files:
                     orphan_files = package.listOrphanFiles()
 

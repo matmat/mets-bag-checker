@@ -46,5 +46,27 @@ class MetsTest(unittest.TestCase):
             manifest = mets.METSPackage(file)
             self.assertEqual(manifest.has_valid_manifest, False)
 
+    def test_orphaned_files(self):
+        """Tests that orphaned files are returned as a list"""
+        with importlib.resources.as_file(
+            importlib.resources.files("sampleMETSPackages.OrphanedFiles").joinpath(
+                "LOCmets.xml"
+            )
+        ) as file:
+            manifest = mets.METSPackage(file)
+            self.assertEqual(manifest.has_no_orphan_files, False)
+            self.assertEqual(manifest.listOrphanFiles(), ["orphan_file.txt"])
+
+    def test_missing_files(self):
+        """Tests that missing files are returned as a list"""
+        with importlib.resources.as_file(
+            importlib.resources.files("sampleMETSPackages.XMLValid").joinpath(
+                "LOCmets.xml"
+            )
+        ) as file:
+            manifest = mets.METSPackage(file)
+            self.assertEqual(manifest.is_complete, False)
+            self.assertEqual(len(manifest.listMissingFiles()), 3)
+
 
 unittest.main()
