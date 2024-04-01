@@ -4,6 +4,7 @@
 """GUI module for METS validation & integrity checking."""
 
 from os import path
+import os
 from time import strftime, localtime
 from math import floor
 import glob
@@ -14,6 +15,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter.messagebox import showinfo, showerror
 import importlib.resources
+import zipfile
 
 import mets
 
@@ -42,17 +44,25 @@ directory = ""
 mets_pattern = r""
 
 
-def find_information_packages(directory, mets_pattern):
-    """Finds METS files in a defined directory based on their filename or
-    filename pattern. Information packages are supposed to be the directories
-    the detected METS file is in."""
+def find_information_packages(directory, package_type, mets_pattern):
+    """Finds packages in a defined directory based on their filename or
+    filename pattern. Information packages are supposed to be either the
+    directories the detected METS file is in or ZIP files located in the
+    directory."""
     list_of_packages = {}
-    for manifest_path in glob.glob(
-        "./**/" + mets_pattern, root_dir=directory, recursive=True
-    ):
-        list_of_packages[manifest_path] = mets.METSPackage(
-            path.join(directory, manifest_path)
-        )
+    if package_type == "directory_package_type":
+        for manifest_path in glob.glob(
+            "./**/" + mets_pattern, root_dir=directory, recursive=True
+        ):
+            list_of_packages[manifest_path] = mets.METSPackage(
+                path.split(path.join(directory, manifest_path))[0], path.split(path.join(directory, manifest_path))[1], package_type='directory'
+            )
+    elif package_type == 'container_package_type':
+        for zip_path in glob.glob(
+            "./**/*.zip", root_dir=directory, recursive=True
+        ):
+            list_of_packages[zip_path] = mets.METSPackage(path.join(directory, path.basename(zip_path)), mets_pattern,
+                                                          package_type='zip')
     return list_of_packages
 
 
@@ -122,7 +132,7 @@ class App(tk.Tk):
 
         # Label to introduce the METSfilename pattern entry.
         self.define_metspattern_label = ttk.Label(
-            self, text="2. Enter the METS filename or pattern:"
+            self, text="2. Enter the METS filename:"
         )
         self.define_metspattern_label.grid(row=2, column=0, sticky=tk.W)
 
@@ -131,6 +141,22 @@ class App(tk.Tk):
         self.define_metspattern_entry = ttk.Entry(self, textvariable=self.mets_pattern)
         self.mets_pattern.set("manifest.xml")
         self.define_metspattern_entry.grid(row=2, column=1)
+
+        # Radiobuttons to define the IP type.
+        self.selected_package_type = tk.StringVar()
+        self.directory_package_type_radiobutton = ttk.Radiobutton(self,
+                                                            text='Directory',
+                                                       value='directory_package_type',
+                                                        variable=self.selected_package_type
+                                                        )
+        self.container_package_type_radiobutton = ttk.Radiobutton(self, text='ZIP '
+                                                       'container file',
+                                                       value='container_package_type',
+                                                        variable=self.selected_package_type
+                                                        )
+        self.directory_package_type_radiobutton.grid(row=3, column=1)
+        self.container_package_type_radiobutton.grid(row=4, column=1)
+        self.selected_package_type.set('directory_package_type')
 
         # Label to introduce the actions selection.
         self.actions_label = ttk.Label(self, text="3. Select one or more actions.")
@@ -281,7 +307,7 @@ class App(tk.Tk):
         else:
             # Detection of the Information Packages based on the METS file namepattern.
             mets_pattern = self.mets_pattern.get()
-            list_of_packages = find_information_packages(directory, mets_pattern)
+            list_of_packages = find_information_packages(directory,self.selected_package_type.get(), mets_pattern)
             # Display progress bar
             progressBar = ttk.Progressbar(
                 self, orient="horizontal", mode="determinate", length=280
@@ -297,47 +323,47 @@ class App(tk.Tk):
                 checkFixity_action,
                 checkOrphanness_action,
             )
-            # Counter to evaluate progression of the analysis process
+            # Counter to evaluate progression of te analysis process
             counter = 0
             for manifest_relative_path, package in list_of_packages.items():
                 report.list_of_packages[manifest_relative_path] = package
                 # Well-formedness check
                 report.wellformedness_report[
-                    package.path_to_mets_file
+                    path.relpath(package.package, start=directory)
                 ] = package.has_wellformed_manifest
                 # Validation check
                 if validate_action.get() == "1":
                     report.validation_report[
-                        package.path_to_mets_file
+                        path.relpath(package.package, start=directory)
                     ] = package.has_valid_manifest
                 # Completeness check
                 if checkCompleteness_action.get() == "1":
-                    report.completeness_report[package.path_to_mets_file] = [
+                    report.completeness_report[path.relpath(package.package, start=directory)] = [
                         package.is_complete
                     ]
                     if (
-                        report.completeness_report[package.path_to_mets_file][0]
+                        report.completeness_report[path.relpath(package.package, start=directory)][0]
                         == False
                     ):
-                        report.completeness_report[package.path_to_mets_file].append(
+                        report.completeness_report[path.relpath(package.package, start=directory)].append(
                             package.listMissingFiles()
                         )
                 # Fixity check
                 if checkFixity_action.get() == "1":
-                    report.fixity_report[package.path_to_mets_file] = [
+                    report.fixity_report[path.relpath(package.package, start=directory)] = [
                         package.is_unaltered
                     ]
-                    if report.fixity_report[package.path_to_mets_file][0] == False:
-                        report.fixity_report[package.path_to_mets_file].append(
+                    if report.fixity_report[path.relpath(package.package, start=directory)][0] == False:
+                        report.fixity_report[path.relpath(package.package, start=directory)].append(
                             package.listAlteredFiles()
                         )
                 # Orphanness check
                 if checkOrphanness_action.get() == "1":
-                    report.orphanness_report[package.path_to_mets_file] = [
+                    report.orphanness_report[path.relpath(package.package, start=directory)] = [
                         package.has_no_orphan_files
                     ]
-                    if report.orphanness_report[package.path_to_mets_file][0] == False:
-                        report.orphanness_report[package.path_to_mets_file].append(
+                    if report.orphanness_report[path.relpath(package.package, start=directory)][0] == False:
+                        report.orphanness_report[path.relpath(package.package, start=directory)].append(
                             package.listOrphanFiles()
                         )
                 counter += 1
@@ -388,26 +414,26 @@ class App(tk.Tk):
         for relative_path, package in report.list_of_packages.items():
             row = [
                 relative_path,
-                report.wellformedness_report[package.path_to_mets_file],
+                report.wellformedness_report[path.relpath(package.package, start=directory)],
             ]
             if "Validation" in report.columns:
-                row.append(report.validation_report[package.path_to_mets_file])
+                row.append(report.validation_report[path.relpath(package.package, start=directory)])
             else:
                 row.append("Not performed")
             if "Completeness check" in report.columns:
-                row.append(report.completeness_report[package.path_to_mets_file][0])
-                if len(report.completeness_report[package.path_to_mets_file]) > 1:
-                    row.append(report.completeness_report[package.path_to_mets_file][1])
+                row.append(report.completeness_report[path.relpath(package.package, start=directory)][0])
+                if len(report.completeness_report[path.relpath(package.package, start=directory)]) > 1:
+                    row.append(report.completeness_report[path.relpath(package.package, start=directory)][1])
                 else:
                     row.append("")
             else:
                 row.append("Not performed")
                 row.append("")
             if "Fixity check" in report.columns:
-                row.append(report.fixity_report[package.path_to_mets_file][0])
-                if len(report.fixity_report[package.path_to_mets_file]) > 1:
-                    row.append(report.fixity_report[package.path_to_mets_file][1][0])
-                    row.append(report.fixity_report[package.path_to_mets_file][1][1])
+                row.append(report.fixity_report[path.relpath(package.package, start=directory)][0])
+                if len(report.fixity_report[path.relpath(package.package, start=directory)]) > 1:
+                    row.append(report.fixity_report[path.relpath(package.package, start=directory)][1][0])
+                    row.append(report.fixity_report[path.relpath(package.package, start=directory)][1][1])
                 else:
                     row.append("")
                     row.append("")
@@ -416,9 +442,9 @@ class App(tk.Tk):
                 row.append("")
                 row.append("")
             if "Orphanness check" in report.columns:
-                row.append(report.orphanness_report[package.path_to_mets_file][0])
-                if len(report.orphanness_report[package.path_to_mets_file]) > 1:
-                    row.append(report.orphanness_report[package.path_to_mets_file][1])
+                row.append(report.orphanness_report[path.relpath(package.package, start=directory)][0])
+                if len(report.orphanness_report[path.relpath(package.package, start=directory)]) > 1:
+                    row.append(report.orphanness_report[path.relpath(package.package, start=directory)][1])
                 else:
                     row.append("")
             else:

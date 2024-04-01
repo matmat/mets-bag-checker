@@ -4,7 +4,7 @@
 """Unit tests for the module mets.py."""
 
 import unittest
-from lxml import etree
+from os import path
 import importlib.resources
 
 import mets
@@ -23,7 +23,7 @@ class MetsTest(unittest.TestCase):
                 "LOCmets.xml"
             )
         ) as file:
-            manifest = mets.METSPackage(file)
+            manifest = mets.METSPackage(path.split(file)[0], path.split(file)[1])
             self.assertEqual(manifest.has_wellformed_manifest, True)
 
     def test_is_valid(self):
@@ -35,7 +35,7 @@ class MetsTest(unittest.TestCase):
                 "LOCmets.xml"
             )
         ) as file:
-            manifest = mets.METSPackage(file)
+            manifest = mets.METSPackage(path.split(file)[0], path.split(file)[1])
             self.assertEqual(manifest.has_valid_manifest, True)
 
         with importlib.resources.as_file(
@@ -43,7 +43,7 @@ class MetsTest(unittest.TestCase):
                 "filnumconsa_producerPackage_initialDelivery_example_version6.xml"
             )
         ) as file:
-            manifest = mets.METSPackage(file)
+            manifest = mets.METSPackage(path.split(file)[0], path.split(file)[1])
             self.assertEqual(manifest.has_valid_manifest, False)
 
     def test_orphaned_files(self):
@@ -53,7 +53,7 @@ class MetsTest(unittest.TestCase):
                 "LOCmets.xml"
             )
         ) as file:
-            manifest = mets.METSPackage(file)
+            manifest = mets.METSPackage(path.split(file)[0], path.split(file)[1])
             self.assertEqual(manifest.has_no_orphan_files, False)
             self.assertEqual(manifest.listOrphanFiles(), ["orphan_file.txt"])
 
@@ -64,7 +64,7 @@ class MetsTest(unittest.TestCase):
                 "LOCmets.xml"
             )
         ) as file:
-            manifest = mets.METSPackage(file)
+            manifest = mets.METSPackage(path.split(file)[0], path.split(file)[1])
             self.assertEqual(manifest.is_complete, False)
             self.assertEqual(len(manifest.listMissingFiles()), 3)
 
