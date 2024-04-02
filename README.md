@@ -34,7 +34,7 @@ Run the interface.py file.
 2. Specify the nature of the package (directory or ZIP container).
 3. Specify the name of your METS manifests (the wildcard "*" is accepted only for directory packages).
 4. Select the actions the tool should perform.
-5. Click on "Launch the test".
+5. Click on "Launch the test". The packages to be analyzed will be identified based on the name of the METS manifest (if the packages are directories) or on the `.zip` extension (if the packages are ZIP containers).
 6. When the test is completed, you can click on the button "Select the location for the report file." to save the report.
 
 ### Python module
