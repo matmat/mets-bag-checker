@@ -34,9 +34,7 @@ Run the interface.py file.
 3. Choose the directories or ZIP files that you want to analyze. You can do this several times, directories or ZIP files will be added to the list.
 4. Select the actions the tool should perform.
 5. Click on "Launch the test".
-6. When the test is completed, the result of the tests are displayed in the table. 
-7. In addition, you can click on the button "Select the location for the report file." to save the report.
-8. If you need to start again the IPs selection step, you can click on "Clear the list of IPs" button.
+6. When the test is completed, you can click on the button "Select the location for the report file." to save the report.
 
 ### Python module
 The file mets.py can be used as a python module: run
