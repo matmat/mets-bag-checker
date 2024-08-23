@@ -13,10 +13,14 @@ import zipfile
 from io import BytesIO
 from lxml import etree
 import importlib.resources
-from tabulate import tabulate
 
 
 class NotAZipError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+
+class ManifestNotFoundError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
@@ -40,9 +44,11 @@ class METSPackage:
             if zipfile.is_zipfile(self.package):
                 zip_package = zipfile.ZipFile(self.package)
                 self.root_dir = zip_package.namelist()[0].split("/")[0]
+                self.manifest_name = path.join(self.root_dir, manifest_name)
             else:
                 raise NotAZipError(f"The package {self.package} is not a ZIP file.")
-        self.manifest_name = manifest_name
+        elif package_type == "directory":
+            self.manifest_name = manifest_name
         self.package_type = package_type
         self.xml = None
 
@@ -66,12 +72,14 @@ class METSPackage:
                 try:
                     self.xml = etree.parse(path.join(self.package, self.manifest_name))
                 except OSError:
-                    print(f"The package {self.package} is not a directory.")
+                    return False
             elif self.package_type == "zip":
                 zip_file = zipfile.ZipFile(self.package)
                 list_zip_content = zip_file.infolist()
                 for file in list_zip_content:
-                    if path.basename(file.filename) == self.manifest_name:
+                    if path.basename(file.filename) == path.basename(
+                        self.manifest_name
+                    ):
                         xml_file_content = zip_file.read(file)
                         self.xml = etree.fromstring(xml_file_content)
         except etree.XMLSyntaxError:
@@ -123,7 +131,9 @@ class METSPackage:
                     file_name_from_root_directory = path.relpath(
                         file.filename, start=self.root_dir
                     )
-                    if not file_name_from_root_directory == self.manifest_name:
+                    if file_name_from_root_directory != path.basename(
+                        self.manifest_name
+                    ):
                         self.list_of_package_files.append(file_name_from_root_directory)
         return self.list_of_package_files
 
@@ -330,19 +340,35 @@ class METSPackage:
         return self.list_of_orphan_files
 
 
-if __name__ == "__main__":
-    if len(sys.argv) >= 3:
-        if path.exists(sys.argv[1]):
-            if path.isdir(sys.argv[1]):
-                package = METSPackage(
-                    sys.argv[1], sys.argv[2], package_type="directory"
+def check(package, manifest):
+    if path.exists(package):
+        if path.isdir(package):
+            if path.exists(path.join(package, manifest)):
+                package = METSPackage(package, manifest, package_type="directory")
+                print(package)
+            else:
+                raise ManifestNotFoundError(
+                    f"Manifest {manifest} cannot be found in package {package}."
                 )
-            elif zipfile.is_zipfile(sys.argv[1]):
-                package = METSPackage(sys.argv[1], sys.argv[2], package_type="zip")
-            print(package)
+        elif zipfile.is_zipfile(package):
+            try:
+                zip_file = zipfile.ZipFile(package)
+                zip_file.getinfo(
+                    path.join(zip_file.namelist()[0].split("/")[0], manifest)
+                )
+                package = METSPackage(package, manifest, package_type="zip")
+                print(package)
+            except KeyError:
+                print(f"Manifest {manifest} cannot be found in package {package}.")
         else:
-            print(f"Package {sys.argv[1]} cannot be found.")
+            print("Argument #1 must be a path to a directory or to a ZIP file.")
+    else:
+        print(f"Package {package} cannot be found.")
 
+
+if __name__ == "__main__":
+    if len(sys.argv) == 3:
+        check(sys.argv[1], sys.argv[2])
     else:
         print(
             "You have to provide one path to a METS package (directory or ZIP file) and the name of the manifest."
