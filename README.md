@@ -8,6 +8,7 @@ METS Bag checker is a simple python tool to help METS implementers with little I
 
 This tool is based on the following conditions and packaging conventions (rather commonly implemented when using METS as a metadata standard for Information Packages, e.g., the [METS rules for digitization produced by the National library of France](https://www.bnf.fr/fr/les-referentiels-de-numerisation-de-la-bnf#bnf-enrichissement-des-m-tadonn-es)):
 * The Information Package is a directory, zipped or not.
+* The manifest name is the same in all Packages - or at least is predictable, according to a given pattern -;
 * The Information Package contains a METS file in its root directory;
 * The location of Data Objects (files referenced from the `//mets:fileSec` element) in the `//mets:file/mets:FLocat/@xlink:href` attribute is expressed by a relative path from the root directory of the package;
 * For each `//mets:file` element, attributes `@CHECKSUM` and `@CHECKSUMTYPE` are provided;
