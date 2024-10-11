@@ -8,22 +8,27 @@ from os import path
 import glob
 import sys
 import hashlib
+import re
+import os
 
 import zipfile
+import tarfile
 from io import BytesIO
 from lxml import etree
 import importlib.resources
 
 
-class NotAZipError(Exception):
+class NotAContainerError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
-
 
 class ManifestNotFoundError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+class ManifestReadingError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
 
 METSschema_filename = "mets.xsd"
 with importlib.resources.as_file(
@@ -36,25 +41,25 @@ with importlib.resources.as_file(
 class METSPackage:
     """This class is instantiated for each METS package. It contains methods
     used to check the consistency of the manifest with the Information
-     package, i.e., the directory or ZIP file where the XML-METS file is located."""
+     package, i.e., the directory or ZIP/TAR file where the XML-METS file is located."""
 
-    def __init__(self, package, manifest_name, package_type="directory") -> None:
+    def __init__(self, package, manifest_pattern) -> None:
         self.package = package
-        if package_type == "zip":
+        if path.isfile(package):
             if zipfile.is_zipfile(self.package):
-                zip_package = zipfile.ZipFile(self.package)
-                self.root_dir = zip_package.namelist()[0].split("/")[0]
-                self.manifest_name = path.join(self.root_dir, manifest_name)
-            else:
-                raise NotAZipError(f"The package {self.package} is not a ZIP file.")
-        elif package_type == "directory":
-            self.manifest_name = manifest_name
-        self.package_type = package_type
-        self.xml = None
+                self.package_type = "zip"
+            elif tarfile.is_tarfile(self.package):
+                self.package_type = "tar"
+        elif path.isdir(package):
+            self.package_type = "directory"        
+        else:
+            raise NotAContainerError(f"The package {self.package} is not a ZIP nor a TAR file.")
+        self.manifest_pattern = manifest_pattern
+        self.manifest_path = self.find_manifest()
 
     def __repr__(self) -> str:
         return (
-            f"Manifest: {self.manifest_name} in package {self.package}.\n"
+            f"Manifest: {self.manifest_path} in package {self.package}.\n"
             f"\tWell-formed: {self.has_wellformed_manifest}\n"
             f"\tValid: {self.has_valid_manifest}\n"
             f"\tComplete: {self.is_complete}\n"
@@ -62,34 +67,69 @@ class METSPackage:
             f"\tHas no orphan files: {self.has_no_orphan_files}\n"
         )
 
-    @property
-    def has_wellformed_manifest(self):
-        """Parses the XML file and returns True if it is well-formed, False
-        otherwise."""
-
-        try:
-            if self.package_type == "directory":
-                try:
-                    self.xml = etree.parse(path.join(self.package, self.manifest_name))
-                except OSError:
-                    return False
-            elif self.package_type == "zip":
-                zip_file = zipfile.ZipFile(self.package)
+    def listPackageFiles(self):
+        """Returns a list of relative paths to every file in the Package
+        (including the manifest) as the attribute list_of_package_files."""
+        self.list_of_package_files = []
+        if self.package_type == "directory":
+            tree = os.walk(self.package, topdown=True)
+            for root, dirs, files in tree:
+                for file in files:
+                    if (not path.isdir(file)):
+                        self.list_of_package_files.append(path.relpath(path.join(root, file), start=self.package))
+        elif self.package_type == "zip":
+            with zipfile.ZipFile(self.package) as zip_file:
                 list_zip_content = zip_file.infolist()
                 for file in list_zip_content:
-                    if path.basename(file.filename) == path.basename(
-                        self.manifest_name
-                    ):
-                        xml_file_content = zip_file.read(file)
-                        self.xml = etree.fromstring(xml_file_content)
-        except etree.XMLSyntaxError:
+                    if not file.is_dir():
+                        self.list_of_package_files.append(file.filename)
+        elif self.package_type == "tar":
+            with tarfile.TarFile(self.package) as tar_file:
+                list_tar_content = tar_file.getmembers()
+                for file in list_tar_content:
+                    if not file.isdir():
+                        self.list_of_package_files.append(file.name)
+        return self.list_of_package_files
+
+    def find_manifest(self):
+        self.list_of_package_files = self.listPackageFiles()
+        try:
+            for filepath in self.list_of_package_files:
+                if re.search(self.manifest_pattern, filepath):
+                    self.manifest_path = filepath
+                    try:
+                        if self.package_type == "directory":
+                            manifest_xml = path.join(self.package, self.manifest_path)
+                            self.xml = etree.parse(manifest_xml)
+                        elif self.package_type == "zip":
+                            with zipfile.ZipFile(self.package) as zip_file:
+                                manifest_xml = zip_file.read(self.manifest_path)
+                                self.xml = etree.fromstring(manifest_xml)
+                        elif self.package_type == "tar":
+                            with tarfile.TarFile(self.package) as tar_file:
+                                xml_file_content = tar_file.extractfile(self.manifest_path)
+                                manifest_xml = xml_file_content.read()
+                                self.xml = etree.fromstring(manifest_xml)
+                    except OSError:
+                        raise ManifestReadingError("The manifest could not be parsed or is not well-formed.")
+                    break
+            return self.manifest_path
+        except AttributeError:
+            raise ManifestNotFoundError(f"No manifest with pattern {self.manifest_path} could be found in package {self.package}.")
+
+    @property
+    def has_wellformed_manifest(self):
+        """Returns True if the manifest has been parsed successfully, False
+        if not."""
+        if hasattr(self, "xml"):
+            return True
+        else:
             return False
-        return True
 
     @property
     def has_valid_manifest(self):
         """Validates the METS file against its XSD schema."""
-        if not self.has_wellformed_manifest:
+        if not hasattr(self, "xml"):
             return False
         return mets_schema.validate(self.xml)
 
@@ -97,7 +137,7 @@ class METSPackage:
         """Returns a list of relative paths referenced in the <fileSec> section
         of the METS file."""
         self.list_of_referenced_files = []
-        if self.has_wellformed_manifest:
+        if hasattr(self, "xml"):
             for file in self.xml.xpath(
                 "/mets:mets/mets:fileSec//mets:file/" "mets:FLocat",
                 namespaces={"mets": "http://www.loc.gov/" "METS/"},
@@ -110,46 +150,17 @@ class METSPackage:
                 )
         return self.list_of_referenced_files
 
-    def listPackageFiles(self):
-        """Returns a list of relative paths to every file located in the same
-        folder as the METS file as the attribute list_of_package_files."""
-        self.list_of_package_files = []
-        if self.package_type == "directory":
-            for file in glob.glob(path.join(self.package, "**/*"), recursive=True):
-                if (
-                    not path.isdir(file)
-                    and not path.basename(file) == self.manifest_name
-                ):
-                    self.list_of_package_files.append(
-                        path.relpath(file, start=self.package)
-                    )
-        elif self.package_type == "zip":
-            zip_file = zipfile.ZipFile(self.package)
-            list_zip_content = zip_file.infolist()
-            for file in list_zip_content:
-                if not file.is_dir():
-                    file_name_from_root_directory = path.relpath(
-                        file.filename, start=self.root_dir
-                    )
-                    if file_name_from_root_directory != path.basename(
-                        self.manifest_name
-                    ):
-                        self.list_of_package_files.append(file_name_from_root_directory)
-        return self.list_of_package_files
-
     @property
     def is_complete(self):
         """Checks referenced files in the mets:fileSec are present in
         the Information Package."""
-        if self.has_wellformed_manifest:
+        if hasattr(self, "xml"):
             try:
                 if not hasattr(self, "list_of_referenced_files"):
                     self.listReferencedFiles()
-                if not hasattr(self, "list_of_package_files"):
-                    self.listPackageFiles()
                 if self.list_of_referenced_files:
                     for file in self.list_of_referenced_files:
-                        if file not in self.list_of_package_files:
+                        if path.join(path.split(self.manifest_path)[0], file) not in self.list_of_package_files:
                             return False
                     return True
                 else:
@@ -165,25 +176,24 @@ class METSPackage:
         self.missing_files = []
         if not hasattr(self, "list_of_referenced_files"):
             self.listReferencedFiles()
-        if not hasattr(self, "list_of_package_files"):
-            self.listPackageFiles()
         if self.list_of_referenced_files:
             for file in self.list_of_referenced_files:
-                if file not in self.list_of_package_files:
+                if path.join(path.split(self.manifest_path)[0], file) not in self.list_of_package_files:
                     self.missing_files.append(file)
         return self.missing_files
 
     @property
     def is_unaltered(self):
-        """Checks that referenced files in the mets:fileSec that
-        can be found at their expected location are unaltered (may return True
-        even if there are missing files)."""
+        """Checks that referenced files in the mets:fileSec that can be found 
+        at their expected location are unaltered (may return True even if there 
+        are missing files)."""
 
-        if self.has_wellformed_manifest:
-            if not hasattr(self, "list_of_package_files"):
-                self.listPackageFiles()
+        if hasattr(self, "xml"):
             if self.package_type == "zip":
                 zip_file = zipfile.ZipFile(self.package)
+            elif self.package_type == "tar":
+                tar_file = tarfile.TarFile(self.package)
+
             for file in self.xml.xpath(
                 "/mets:mets/mets:fileSec//mets:file/" "mets:FLocat",
                 namespaces={"mets": "http://www.loc.gov/" "METS/"},
@@ -192,7 +202,7 @@ class METSPackage:
                     "@xlink:href",
                     namespaces={"xlink": "http://www.w3.org/" "1999/xlink"},
                 )[0]
-                if relative_path_to_file not in self.list_of_package_files:
+                if path.join(path.split(self.manifest_path)[0], relative_path_to_file) not in self.list_of_package_files:
                     pass
                 elif file.xpath("../@CHECKSUM") and file.xpath("../@CHECKSUMTYPE"):
                     buffer_size = 65536
@@ -208,7 +218,7 @@ class METSPackage:
                         checksum = hashlib.sha512()
                     if self.package_type == "directory":
                         with open(
-                            path.join(self.package, relative_path_to_file), "rb"
+                            path.join(self.package, path.split(self.manifest_path)[0], relative_path_to_file), "rb"
                         ) as binaryFile:
                             while True:
                                 data = binaryFile.read(buffer_size)
@@ -217,7 +227,7 @@ class METSPackage:
                                 checksum.update(data)
                     elif self.package_type == "zip":
                         with zip_file.open(
-                            path.join(self.root_dir, relative_path_to_file)
+                            path.join(path.split(self.manifest_path)[0], relative_path_to_file)
                         ) as zip_entry:
                             while True:
                                 data = zip_entry.read(buffer_size)
@@ -226,16 +236,33 @@ class METSPackage:
                                 if not data:
                                     break
                                 checksum.update(chunk_bytes)
+                    elif self.package_type == "tar":
+                        tar_entry = tar_file.getmember(
+                        path.join(path.split(self.manifest_path)[0], relative_path_to_file))
+                        file_entry = tar_file.extractfile(tar_entry)
+                        while True:
+                            data = file_entry.read(buffer_size)
+                            chunk_stream = BytesIO(data)
+                            chunk_bytes = chunk_stream.read()
+                            if not data:
+                                break
+                            checksum.update(chunk_bytes)
                     if checksum.hexdigest() != file.xpath("../@CHECKSUM")[0]:
                         if self.package_type == "zip":
                             zip_file.close()
+                        elif self.package_type == "tar":
+                            tar_file.close()
                         return False
                 else:
                     if self.package_type == "zip":
                         zip_file.close()
+                    elif self.package_type == "tar":
+                        tar_file.close()
                     return False
             if self.package_type == "zip":
                 zip_file.close()
+            elif self.package_type == "tar":
+                tar_file.close()
             return True
         else:
             return False
@@ -245,11 +272,11 @@ class METSPackage:
         second a list of unchecked files."""
         self.unchecked_files = []
         self.altered_files = []
-        if self.has_wellformed_manifest:
-            if not hasattr(self, "list_of_package_files"):
-                self.listPackageFiles()
+        if hasattr(self, "xml"):
             if self.package_type == "zip":
                 zip_file = zipfile.ZipFile(self.package)
+            elif self.package_type == "tar":
+                tar_file = tarfile.TarFile(self.package)
             for file in self.xml.xpath(
                 "/mets:mets/mets:fileSec//mets:file/" "mets:FLocat",
                 namespaces={"mets": "http://www.loc.gov/" "METS/"},
@@ -258,7 +285,7 @@ class METSPackage:
                     "@xlink:href",
                     namespaces={"xlink": "http://www.w3.org/" "1999/xlink"},
                 )[0]
-                if relative_path_to_file not in self.list_of_package_files:
+                if path.join(path.split(self.manifest_path)[0], relative_path_to_file) not in self.list_of_package_files:
                     pass
                 elif file.xpath("../@CHECKSUM") and file.xpath("../@CHECKSUMTYPE"):
                     buffer_size = 65536
@@ -275,7 +302,7 @@ class METSPackage:
 
                     if self.package_type == "directory":
                         with open(
-                            path.join(self.package, relative_path_to_file), "rb"
+                            path.join(self.package, path.split(self.manifest_path)[0], relative_path_to_file), "rb"
                         ) as binaryFile:
                             while True:
                                 data = binaryFile.read(buffer_size)
@@ -284,7 +311,7 @@ class METSPackage:
                                 checksum.update(data)
                     elif self.package_type == "zip":
                         with zip_file.open(
-                            path.join(self.root_dir, relative_path_to_file)
+                            path.join(path.split(self.manifest_path)[0], relative_path_to_file)
                         ) as zip_entry:
                             while True:
                                 data = zip_entry.read(buffer_size)
@@ -293,33 +320,39 @@ class METSPackage:
                                 if not data:
                                     break
                                 checksum.update(chunk_bytes)
+                    elif self.package_type == "tar":
+                        tar_entry = tar_file.getmember(
+                        path.join(path.split(self.manifest_path)[0], relative_path_to_file))
+                        file_entry = tar_file.extractfile(tar_entry)
+                        while True:
+                            data = file_entry.read(buffer_size)
+                            chunk_stream = BytesIO(data)
+                            chunk_bytes = chunk_stream.read()
+                            if not data:
+                                break
+                            checksum.update(chunk_bytes)
                     if checksum.hexdigest() != file.xpath("../@CHECKSUM")[0]:
-                        if self.package_type == "zip":
-                            relative_path_to_file = path.join(
-                                self.root_dir, relative_path_to_file
-                            )
-                        self.altered_files.append(relative_path_to_file)
+                        self.altered_files.append(path.join(path.split(self.manifest_path)[0], relative_path_to_file))
                 else:
-                    if self.package_type == "zip":
-                        relative_path_to_file = path.join(
-                            self.root_dir, relative_path_to_file
-                        )
-                    self.unchecked_files.append(relative_path_to_file)
+                    self.unchecked_files.append(path.join(path.split(self.manifest_path)[0], relative_path_to_file))
         if self.package_type == "zip":
             zip_file.close()
+        elif self.package_type == "tar":
+            tar_file.close()
         return (self.altered_files, self.unchecked_files)
 
     @property
     def has_no_orphan_files(self):
         """Checks the absence of unreferenced files in the Information Package,
-        i.e., files that are in the same folder as the METS file but that are
-        not referenced in its file section <fileSec>."""
-        if self.has_wellformed_manifest:
+        i.e., files that are in the Package but that are not referenced in the 
+        manifest's file section <fileSec>."""
+        if hasattr(self, "xml"):
             if not hasattr(self, "list_of_referenced_files"):
                 self.listReferencedFiles()
-            self.listPackageFiles()
             for file in self.list_of_package_files:
-                if file not in self.list_of_referenced_files:
+                if path.relpath(file, start=path.split(self.manifest_path)[0]) \
+                    not in self.list_of_referenced_files and file != \
+                        self.manifest_path:
                     return False
             return True
         else:
@@ -330,38 +363,21 @@ class METSPackage:
         files that are in the same folder as the METS file but that are not
         referenced in its file section <fileSec>."""
         self.list_of_orphan_files = []
-        if self.has_wellformed_manifest:
+        if hasattr(self, "xml"):
             if not hasattr(self, "list_of_referenced_files"):
                 self.listReferencedFiles()
-            self.listPackageFiles()
             for file in self.list_of_package_files:
-                if file not in self.list_of_referenced_files:
+                if path.relpath(file, start=path.split(self.manifest_path)[0]) \
+                    not in self.list_of_referenced_files and file != \
+                        self.manifest_path:
                     self.list_of_orphan_files.append(file)
         return self.list_of_orphan_files
 
 
 def check(package, manifest):
     if path.exists(package):
-        if path.isdir(package):
-            if path.exists(path.join(package, manifest)):
-                package = METSPackage(package, manifest, package_type="directory")
-                print(package)
-            else:
-                raise ManifestNotFoundError(
-                    f"Manifest {manifest} cannot be found in package {package}."
-                )
-        elif zipfile.is_zipfile(package):
-            try:
-                zip_file = zipfile.ZipFile(package)
-                zip_file.getinfo(
-                    path.join(zip_file.namelist()[0].split("/")[0], manifest)
-                )
-                package = METSPackage(package, manifest, package_type="zip")
-                print(package)
-            except KeyError:
-                print(f"Manifest {manifest} cannot be found in package {package}.")
-        else:
-            print("Argument #1 must be a path to a directory or to a ZIP file.")
+        package = METSPackage(package, manifest)
+        print(package)
     else:
         print(f"Package {package} cannot be found.")
 

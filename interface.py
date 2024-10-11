@@ -95,7 +95,7 @@ class App(tk.Tk):
 
         # Label to introduce the METS filename pattern entry.
         self.define_metspattern_label = ttk.Label(
-            self, text="1. Enter the METS filename:"
+            self, text="1. Enter the METS REGEX filename pattern:"
         )
         self.define_metspattern_label.grid(row=0, column=0, sticky=tk.W)
 
@@ -121,8 +121,8 @@ class App(tk.Tk):
         )
         self.container_package_type_radiobutton = ttk.Radiobutton(
             self,
-            text="ZIP " "container file",
-            value="zip",
+            text="ZIP/TAR container file",
+            value="container",
             variable=self.selected_package_type,
         )
         self.directory_package_type_radiobutton.grid(row=1, column=1)
@@ -255,7 +255,7 @@ class App(tk.Tk):
         if self.selected_package_type.get() == "directory":
             new_list = tkfilebrowser.askopendirnames()
 
-        elif self.selected_package_type.get() == "zip":
+        elif self.selected_package_type.get() == "container":
             new_list = tkfilebrowser.askopenfilenames()
 
         try:
@@ -305,8 +305,7 @@ class App(tk.Tk):
             list_of_packages = {}
             for IP in IPs:
                 list_of_packages[IP] = mets.METSPackage(
-                    IP, mets_pattern, self.selected_package_type.get()
-                )
+                    IP, mets_pattern)
             # Display progress bar
             progressBar = ttk.Progressbar(
                 self, orient="horizontal", mode="determinate", length=280
@@ -470,9 +469,9 @@ class App(tk.Tk):
         self.directory_package_type_radiobutton.configure(state="normal")
         self.container_package_type_radiobutton.configure(state="normal")
 
-    def report_callback_exception(self, exc, val, tb):
-        """Manages exceptions and returns them to the user in an error box"""
-        showerror("Error", message=str(val))
+    # def report_callback_exception(self, exc, val, tb):
+        # """Manages exceptions and returns them to the user in an error box"""
+        # showerror("Error", message=str(val))
 
 
 if __name__ == "__main__":
