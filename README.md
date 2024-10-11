@@ -41,6 +41,6 @@ Run the interface.py file.
 ### Python module
 The file mets.py can be used as a python module: run
 
-`python3 mets.py [path to the package (directory of ZIP file)] [METS filename]`
+`python3 mets.py [path to the package (directory of ZIP/TAR file)] [METS REGEX filename pattern]`
 
 It will perform all the different checks.
