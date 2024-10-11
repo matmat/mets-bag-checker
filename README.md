@@ -7,10 +7,10 @@ METS Bag checker is a simple python tool to help METS implementers with little I
 [Metadata Encoding and Transmission Standard (METS)](https://www.loc.gov/standards/mets/) is a metadata standard for packaging metadata of different types in a single XML file to describe a digital object at different levels of precision. It is not, though, a packaging standard like BagIt, though its `//mets:fileSec` element provides enough information to act as a manifest: a list of packaged files associated with a hash value.
 
 This tool is based on the following conditions and packaging conventions (rather commonly implemented when using METS as a metadata standard for Information Packages, e.g., the [METS rules for digitization produced by the National library of France](https://www.bnf.fr/fr/les-referentiels-de-numerisation-de-la-bnf#bnf-enrichissement-des-m-tadonn-es)):
-* The Information Package is a directory, zipped or not.
+* The Information Package is a directory, a ZIP or a TAR file.
 * The manifest name is the same in all Packages - or at least is predictable, according to a given pattern -;
-* The Information Package contains a METS file;
-* The location of Data Objects (files referenced from the `//mets:fileSec` element) in the `//mets:file/mets:FLocat/@xlink:href` attribute is expressed by a relative path from the root directory of the package;
+* The Information Package contains one METS file referencing all packaged files;
+* The location of Data Objects (files referenced from the `//mets:fileSec` element) in the `//mets:file/mets:FLocat/@xlink:href` attribute is expressed by a relative path from the METS file location;
 * For each `//mets:file` element, attributes `@CHECKSUM` and `@CHECKSUMTYPE` are provided;
 * The number of supported algorithms is limited, hence `@CHECKSUMTYPE` attributes' value are one of `MD5`, `SHA-1`, `SHA-256`, `SHA-384`, `SHA-512`.
 
@@ -23,12 +23,15 @@ The tool requires python 3.9 to work properly.
 * **Fixity check**: the actual checksum of all files referenced in the `//mets:fileSec` is consistent with the value specified in the METS file;
 * **Orphanness check**: the Information Package does not contain files that would not be referenced in the METS file.
 
+## Installation
+* Download the content of the project (Code > Download the source code or by running `git clone https://framagit.org/BCaron/mets-bag-checker.git`).
+* From a terminal, in the folder downloaded at the previous step, run the command `pip install -r requirements.txt` (this will install module requirements, namely the module tkfilebrowser, which is not included in python by default).
+* Run the file `interface.py` (`python3 interface.py`). The user interface should appear.
+
 ## Use
 METS Bag checker can be used in the following ways.
 ### GUI
 The interface.py file creates an interface to perform batch checks on all METS files conforming to a certain filename pattern located in a directory.
-
-Run the interface.py file.
 
 1. Specify the filename pattern of your METS manifests according to the REGEX syntax (dots should be escaped: `\.`).
 2. Specify the nature of the package (directory or ZIP/TAR container).
