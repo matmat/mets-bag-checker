@@ -1,2 +1,4 @@
-lxml==4.9.3
+Babel==2.15.0
+lxml==5.1.0
+psutil==6.0.0
 tkfilebrowser==2.3.2

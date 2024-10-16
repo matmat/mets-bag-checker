@@ -142,12 +142,14 @@ class METSPackage:
                 "/mets:mets/mets:fileSec//mets:file/" "mets:FLocat",
                 namespaces={"mets": "http://www.loc.gov/" "METS/"},
             ):
-                self.list_of_referenced_files.append(
-                    file.xpath(
+                relative_path = file.xpath(
                         "@xlink:href",
                         namespaces={"xlink": "http://www.w3.org/" "1999/xlink"},
                     )[0]
-                )
+                # Stripping URL file protocol
+                if re.match(r"^file:/*", relative_path):
+                    relative_path = re.sub(r"^file:/*", "", relative_path)
+                self.list_of_referenced_files.append(relative_path)
         return self.list_of_referenced_files
 
     @property
