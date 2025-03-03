@@ -145,10 +145,7 @@ class METSPackage:
                 relative_path = file.xpath(
                         "@xlink:href",
                         namespaces={"xlink": "http://www.w3.org/" "1999/xlink"},
-                    )[0]
-                # Stripping URL file protocol
-                if re.match(r"^file:/*", relative_path):
-                    relative_path = re.sub(r"^file:/*", "", relative_path)
+                    )[0].removeprefix("file:")
                 self.list_of_referenced_files.append(relative_path)
         return self.list_of_referenced_files
 
@@ -203,7 +200,7 @@ class METSPackage:
                 relative_path_to_file = file.xpath(
                     "@xlink:href",
                     namespaces={"xlink": "http://www.w3.org/" "1999/xlink"},
-                )[0]
+                )[0].removeprefix("file:")
                 if path.join(path.split(self.manifest_path)[0], relative_path_to_file) not in self.list_of_package_files:
                     pass
                 elif file.xpath("../@CHECKSUM") and file.xpath("../@CHECKSUMTYPE"):
@@ -249,7 +246,7 @@ class METSPackage:
                             if not data:
                                 break
                             checksum.update(chunk_bytes)
-                    if checksum.hexdigest() != file.xpath("../@CHECKSUM")[0]:
+                    if checksum.hexdigest() != file.xpath("../@CHECKSUM")[0].lower():
                         if self.package_type == "zip":
                             zip_file.close()
                         elif self.package_type == "tar":
@@ -286,7 +283,7 @@ class METSPackage:
                 relative_path_to_file = file.xpath(
                     "@xlink:href",
                     namespaces={"xlink": "http://www.w3.org/" "1999/xlink"},
-                )[0]
+                )[0].removeprefix("file:")
                 if path.join(path.split(self.manifest_path)[0], relative_path_to_file) not in self.list_of_package_files:
                     pass
                 elif file.xpath("../@CHECKSUM") and file.xpath("../@CHECKSUMTYPE"):
@@ -333,7 +330,7 @@ class METSPackage:
                             if not data:
                                 break
                             checksum.update(chunk_bytes)
-                    if checksum.hexdigest() != file.xpath("../@CHECKSUM")[0]:
+                    if checksum.hexdigest() != file.xpath("../@CHECKSUM")[0].lower():
                         self.altered_files.append(path.join(path.split(self.manifest_path)[0], relative_path_to_file))
                 else:
                     self.unchecked_files.append(path.join(path.split(self.manifest_path)[0], relative_path_to_file))
